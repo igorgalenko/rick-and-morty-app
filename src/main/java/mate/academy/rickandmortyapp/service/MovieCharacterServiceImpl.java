@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import mate.academy.rickandmortyapp.dto.ApiResponseDto;
+import mate.academy.rickandmortyapp.dto.external.ApiResponseDto;
 import mate.academy.rickandmortyapp.dto.mapper.MovieCharacterMapper;
 import mate.academy.rickandmortyapp.model.MovieCharacter;
 import mate.academy.rickandmortyapp.repository.MovieCharacterRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +28,7 @@ public class MovieCharacterServiceImpl implements MovieCharacterService {
         this.characterMapper = characterMapper;
     }
 
+    @Scheduled(cron = "* 0 8 * * *")
     @Override
     public void syncExternalCharacters() {
         ApiResponseDto apiResponseDto = httpClient.get(API_CHARACTER_URL, ApiResponseDto.class);
@@ -38,6 +40,18 @@ public class MovieCharacterServiceImpl implements MovieCharacterService {
                     ApiResponseDto.class);
             saveDtoToDb(apiResponseDto);
         }
+    }
+
+    @Override
+    public MovieCharacter getRandomCharacter() {
+        long count = movieCharacterRepository.count();
+        long randomId = (long) (Math.random() * count);
+        return movieCharacterRepository.getReferenceById(randomId);
+    }
+
+    @Override
+    public List<MovieCharacter> findAllByNameContains(String namePart) {
+        return movieCharacterRepository.findAllByNameContains(namePart);
     }
 
     private void saveDtoToDb(ApiResponseDto apiResponseDto) {
