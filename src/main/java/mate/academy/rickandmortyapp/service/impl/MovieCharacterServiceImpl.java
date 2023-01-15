@@ -1,18 +1,24 @@
-package mate.academy.rickandmortyapp.service;
+package mate.academy.rickandmortyapp.service.impl;
 
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.extern.log4j.Log4j2;
+import mate.academy.rickandmortyapp.dto.external.ApiCharacterDto;
 import mate.academy.rickandmortyapp.dto.external.ApiResponseDto;
 import mate.academy.rickandmortyapp.dto.mapper.MovieCharacterMapper;
 import mate.academy.rickandmortyapp.model.MovieCharacter;
 import mate.academy.rickandmortyapp.repository.MovieCharacterRepository;
+import mate.academy.rickandmortyapp.service.HttpClient;
+import mate.academy.rickandmortyapp.service.MovieCharacterService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+@Log4j2
 @Service
 public class MovieCharacterServiceImpl implements MovieCharacterService {
     private static final String API_CHARACTER_URL = "https://rickandmortyapi.com/api/character";
@@ -28,33 +34,36 @@ public class MovieCharacterServiceImpl implements MovieCharacterService {
         this.characterMapper = characterMapper;
     }
 
+    @PostConstruct
     @Scheduled(cron = "* 0 8 * * *")
-    @Override
     public void syncExternalCharacters() {
-        ApiResponseDto apiResponseDto = httpClient.get(API_CHARACTER_URL, ApiResponseDto.class);
+        log.info("Starting of sync data with 3rd party API");
+        ApiResponseDto responseDto = httpClient.get(API_CHARACTER_URL, ApiResponseDto.class);
 
-        saveDtoToDb(apiResponseDto);
+        saveDtoToDb(responseDto);
 
-        while ((apiResponseDto.getInfo().getNext()) != null) {
-            apiResponseDto = httpClient.get(apiResponseDto.getInfo().getNext(),
-                    ApiResponseDto.class);
-            saveDtoToDb(apiResponseDto);
+        while ((responseDto.getInfo().getNext()) != null) {
+            responseDto = httpClient.get(responseDto.getInfo().getNext(), ApiResponseDto.class);
+            saveDtoToDb(responseDto);
         }
+        log.info("Ending of sync data with 3rd party API");
     }
 
     @Override
     public MovieCharacter getRandomCharacter() {
         long count = movieCharacterRepository.count();
         long randomId = (long) (Math.random() * count);
+        log.info("Getting movie character by random id " + randomId);
         return movieCharacterRepository.getReferenceById(randomId);
     }
 
     @Override
     public List<MovieCharacter> findAllByNameContains(String namePart) {
+        log.info("Finding movie characters by name part: " + namePart);
         return movieCharacterRepository.findAllByNameContains(namePart);
     }
 
-    private void saveDtoToDb(ApiResponseDto apiResponseDto) {
+    void saveDtoToDb(ApiResponseDto apiResponseDto) {
         Map<Long, MovieCharacter> charactersWithIds = Arrays.stream(apiResponseDto.getResults())
                 .map(characterMapper::toModel)
                 .collect(Collectors.toMap(MovieCharacter::getExternalId, Function.identity()));
