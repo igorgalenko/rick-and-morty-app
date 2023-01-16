@@ -11,7 +11,6 @@ import mate.academy.rickandmortyapp.model.Gender;
 import mate.academy.rickandmortyapp.model.MovieCharacter;
 import mate.academy.rickandmortyapp.model.Status;
 import mate.academy.rickandmortyapp.repository.MovieCharacterRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
