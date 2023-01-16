@@ -14,13 +14,13 @@ services:
   app:
     depends_on:
       - postgres
-    image: ivg/example-postgres-app
+    image: ivg/rick-and-morty-app
     build: .
     env_file:
       - ./.env
     ports:
-      - $SPRING_LOCAL_PORT=$SPRING_DOCKER_PORT
-      - $DEBUG_PORT=$DEBUG_PORT
+      - $SPRING_LOCAL_PORT:$SPRING_DOCKER_PORT
+      - $DEBUG_PORT:$DEBUG_PORT
     environment:
       SPRING_APPLICATION_JSON: '{
         "spring.datasource.url" : "jdbc:postgresql://postgres:$POSTGRES_DOCKER_PORT/$POSTGRES_DB",

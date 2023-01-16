@@ -9,11 +9,7 @@
         </File>
     </Appenders>
     <Loggers>
-        <Logger name = "mate.academy" level = "info" additivity = "false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="LogToFile"/>
-        </Logger>
-        <Root level="info" additivity="false">
+        <Root level="info">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="LogToFile"/>
         </Root>
