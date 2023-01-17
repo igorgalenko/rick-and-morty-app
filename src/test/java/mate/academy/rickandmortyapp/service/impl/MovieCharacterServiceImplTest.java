@@ -11,6 +11,7 @@ import mate.academy.rickandmortyapp.model.Gender;
 import mate.academy.rickandmortyapp.model.MovieCharacter;
 import mate.academy.rickandmortyapp.model.Status;
 import mate.academy.rickandmortyapp.repository.MovieCharacterRepository;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,21 +27,27 @@ class MovieCharacterServiceImplTest {
     private MovieCharacterMapper mapper;
     @InjectMocks
     private MovieCharacterServiceImpl characterService;
+    private ApiCharacterDto rickDto;
+    private ApiCharacterDto mortyDto;
 
-    @Test
-    void shouldSaveWithoutExceptions() {
-        ApiResponseDto responseDto = new ApiResponseDto();
-        ApiCharacterDto rickDto = new ApiCharacterDto();
+    @BeforeAll
+    void init() {
+        rickDto = new ApiCharacterDto();
         rickDto.setId(1L);
         rickDto.setName("Rick");
         rickDto.setGender(Gender.MALE.name());
         rickDto.setStatus(Status.ALIVE.name());
 
-        ApiCharacterDto mortyDto = new ApiCharacterDto();
+        mortyDto = new ApiCharacterDto();
         mortyDto.setId(2L);
         mortyDto.setName("Morty");
         mortyDto.setGender(Gender.MALE.name());
         mortyDto.setStatus(Status.ALIVE.name());
+    }
+
+    @Test
+    void shouldSaveWithoutExceptions() {
+        ApiResponseDto responseDto = new ApiResponseDto();
 
         MovieCharacterMapper characterMapper = new MovieCharacterMapper();
         MovieCharacter rick = characterMapper.toModel(rickDto);
@@ -55,6 +62,7 @@ class MovieCharacterServiceImplTest {
 
         characterService.saveDtoToDb(responseDto);
 
-        Mockito.verify(characterRepository, Mockito.times(1)).saveAll(List.of(rick, morty));
+        Mockito.verify(characterRepository, Mockito.times(1))
+                .saveAll(List.of(rick, morty));
     }
 }
